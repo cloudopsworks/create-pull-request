@@ -458,11 +458,9 @@ function createPullRequest(inputs) {
                 // deleted after being merged or closed. Without this the push using
                 // '--force-with-lease' fails due to "stale info."
                 // https://github.com/peter-evans/create-pull-request/issues/633
-                try {
-                    yield git.exec(['remote', 'prune', branchRemoteName]);
-                }
-                catch (error) {
-                    core.warning(`Failed to prune remote '${branchRemoteName}': ${error.message}`);
+                const pruneResult = yield git.exec(['remote', 'prune', branchRemoteName], { allowAllExitCodes: true });
+                if (pruneResult.exitCode !== 0) {
+                    core.warning(`Failed to prune remote '${branchRemoteName}': ${pruneResult.stderr.trim()}`);
                 }
             }
             core.endGroup();
